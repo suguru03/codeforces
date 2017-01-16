@@ -1,0 +1,15 @@
+{
+  "name": "codeforces",
+  "version": "0.0.0",
+  "main": "index.js",
+  "author": "Suguru Motegi",
+  "license": "MIT",
+  "scripts": {
+    "test": "node test"
+  },
+  "devDependencies": {
+    "lodash": "^4.16.4",
+    "minimist": "^1.2.0",
+    "vm-agent": "^0.3.0"
+  }
+}
