@@ -1,10 +1,10 @@
 'use strict';
 
 const fs = require('fs');
+const vm = require('vm');
 const path = require('path');
 
 const _ = require('lodash');
-const { Agent } = require('vm-agent');
 
 const colors = _.mapValues({
   pass: 90,
@@ -36,34 +36,15 @@ const c = {
   pending: '-'
 };
 
-class Test {
-  constructor(dirpath) {
-    const filepath = path.resolve(dirpath, 'index.js');
-    const context = Object.assign({}, global);
-    const result = [];
-    this._input = undefined;
-    this._result = result;
-    context.readline = () => this._input;
-    context.print = function() {
-      const args = _.toArray(arguments);
-      result.push(args.join(' '));
-    };
-    this._agent = new Agent(fs.readFileSync(filepath, 'utf8'), context);
-  }
-  exec(input) {
-    this._input = input || '';
-    this._result.length = 0;
-    this._agent.run();
-    return this._result.join('\n');
-  }
-}
 const counts = {
   passing: 0,
   failing: 0
 };
 
+module.exports = { exec };
+
 global.describe = ((title, task) => {
-  console.log(`  ${title}`);
+  console.log(`\n  ${title}`);
   global.it = ((name, task) => {
     try {
       task();
@@ -88,14 +69,24 @@ process.on('exit', () => {
   console.log('');
 });
 
-module.exports = { set, exec };
-
-let test;
-
-function set(dirname) {
-  test = new Test(dirname);
+function exec(input) {
+  const filepath = getFilepath();
+  const context = Object.assign({}, global);
+  context.readline = () => input;
+  const result = [];
+  context.print = function() {
+    const args = _.toArray(arguments);
+    result.push(args.join(' '));
+  };
+  vm.runInNewContext(fs.readFileSync(filepath, 'utf8'), context);
+  return result.join('\n');
 }
 
-function exec(input) {
-  return test.exec(input);
+function getFilepath() {
+  const trace = new Error().stack.split('\n');
+  const dirpath = _.get(trace[3].match(/\((.*)\/test.js/), [1], '');
+  if (!dirpath) {
+    throw new Error('filepath not found');
+  }
+  return path.resolve(dirpath, 'index.js');
 }

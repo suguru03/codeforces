@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "lodash": "^4.16.4",
-    "minimist": "^1.2.0",
-    "vm-agent": "^0.3.0"
+    "minimist": "^1.2.0"
   }
 }
