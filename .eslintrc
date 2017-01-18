@@ -44,7 +44,7 @@ rules:
   callback-return: [2, ["callback", "cb", "next", "done"]]
 
 globals:
-  leadline: 1
+  readline: 1
   print: 1
 
 env:
